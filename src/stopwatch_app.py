@@ -21,6 +21,8 @@ class StopwatchApp:
         self._root: Any | None = root
         self._display_text: str = self._stopwatch.display_time
 
+        self._display_var: Any | None = None
+        self._status_var: Any | None = None
         self._display_label: Any | None = None
         self._status_label: Any | None = None
         self._start_button: Any | None = None
@@ -58,8 +60,12 @@ class StopwatchApp:
 
     def update_display(self) -> None:
         self._display_text = self._stopwatch.display_time
+        if self._display_var is not None:
+            self._display_var.set(self._display_text)
         if self._display_label is not None:
             self._display_label.config(text=self._display_text)
+        if self._status_var is not None:
+            self._status_var.set(self.status.value.upper())
         if self._status_label is not None:
             self._status_label.config(text=self.status.value.upper())
         self._update_button_states()
@@ -96,27 +102,45 @@ class StopwatchApp:
         assert self._root is not None
 
         self._root.title("Stopwatch")
-        self._root.geometry("380x240")
+        self._root.geometry("400x260")
         self._root.resizable(False, False)
 
         main_frame = tk.Frame(self._root, padx=20, pady=20)
         main_frame.pack(expand=True, fill=tk.BOTH)
 
+        self._status_var = tk.StringVar(
+            self._root, value=self.status.value.upper()
+        )
         self._status_label = tk.Label(
             main_frame,
+            textvariable=self._status_var,
             text=self.status.value.upper(),
             font=("Helvetica", 14, "bold"),
-            fg="#666666",
+            fg="#555555",
         )
         self._status_label.pack(pady=(0, 10))
 
-        self._display_label = tk.Label(
+        # Dedicated high-contrast digital display screen box
+        display_frame = tk.Frame(
             main_frame,
-            text=self._display_text,
-            font=("Courier", 48, "bold"),
-            fg="#222222",
+            bg="#111116",
+            bd=3,
+            relief=tk.RIDGE,
+            padx=16,
+            pady=12,
         )
-        self._display_label.pack(pady=(0, 20))
+        display_frame.pack(fill=tk.X, pady=(0, 20))
+
+        self._display_var = tk.StringVar(self._root, value=self._display_text)
+        self._display_label = tk.Label(
+            display_frame,
+            textvariable=self._display_var,
+            text=self._display_text,
+            font=("Menlo", 42, "bold"),
+            bg="#111116",
+            fg="#00FF66",
+        )
+        self._display_label.pack(expand=True)
 
         buttons_frame = tk.Frame(main_frame)
         buttons_frame.pack()
