@@ -6,6 +6,23 @@ from enum import Enum
 from typing import NamedTuple
 
 
+class SnakeColor(str, Enum):
+    GREEN = "green"
+    RED = "red"
+    ORANGE = "orange"
+
+    def __str__(self) -> str:
+        return self.value
+
+
+class SnakeRole(str, Enum):
+    PLAYER = "player"
+    NPC = "npc"
+
+    def __str__(self) -> str:
+        return self.value
+
+
 class Direction(Enum):
     UP = (0, -1)
     DOWN = (0, 1)
@@ -34,22 +51,17 @@ class Coordinate(NamedTuple):
         return Coordinate(self.x + direction.delta_x, self.y + direction.delta_y)
 
 
+class Dot(NamedTuple):
+    coordinate: Coordinate
+    color: SnakeColor
+
+
 class GameStatus(str, Enum):
     READY = "ready"
     RUNNING = "running"
     PAUSED = "paused"
+    PLAYER_WON = "player_won"
     GAME_OVER = "game_over"
 
     def __str__(self) -> str:
         return self.value
-
-
-class MoveResult(str, Enum):
-    MOVED = "moved"
-    ATE_FOOD = "ate_food"
-    COLLIDED_WALL = "collided_wall"
-    COLLIDED_SELF = "collided_self"
-
-
-class InvalidMoveError(ValueError):
-    """Raised when an invalid game move or state transition is requested."""
