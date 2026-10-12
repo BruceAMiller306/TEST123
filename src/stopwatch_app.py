@@ -21,10 +21,9 @@ class StopwatchApp:
         self._root: Any | None = root
         self._display_text: str = self._stopwatch.display_time
 
-        self._display_var: Any | None = None
-        self._status_var: Any | None = None
-        self._display_label: Any | None = None
-        self._status_label: Any | None = None
+        self._canvas: Any | None = None
+        self._display_text_id: Any | None = None
+        self._status_text_id: Any | None = None
         self._start_button: Any | None = None
         self._pause_button: Any | None = None
         self._resume_button: Any | None = None
@@ -60,14 +59,14 @@ class StopwatchApp:
 
     def update_display(self) -> None:
         self._display_text = self._stopwatch.display_time
-        if self._display_var is not None:
-            self._display_var.set(self._display_text)
-        if self._display_label is not None:
-            self._display_label.config(text=self._display_text)
-        if self._status_var is not None:
-            self._status_var.set(self.status.value.upper())
-        if self._status_label is not None:
-            self._status_label.config(text=self.status.value.upper())
+        if self._canvas is not None and self._display_text_id is not None:
+            self._canvas.itemconfig(
+                self._display_text_id, text=self._display_text
+            )
+        if self._canvas is not None and self._status_text_id is not None:
+            self._canvas.itemconfig(
+                self._status_text_id, text=self.status.value.upper()
+            )
         self._update_button_states()
 
     def _tick(self) -> None:
@@ -102,45 +101,38 @@ class StopwatchApp:
         assert self._root is not None
 
         self._root.title("Stopwatch")
-        self._root.geometry("400x260")
+        self._root.geometry("420x250")
         self._root.resizable(False, False)
 
-        main_frame = tk.Frame(self._root, padx=20, pady=20)
+        main_frame = tk.Frame(self._root, padx=20, pady=16)
         main_frame.pack(expand=True, fill=tk.BOTH)
 
-        self._status_var = tk.StringVar(
-            self._root, value=self.status.value.upper()
-        )
-        self._status_label = tk.Label(
+        # Digital display canvas: renders directly without macOS native label bugs
+        self._canvas = tk.Canvas(
             main_frame,
-            textvariable=self._status_var,
+            width=360,
+            height=120,
+            bg="#0d1117",
+            highlightthickness=2,
+            highlightbackground="#30363d",
+        )
+        self._canvas.pack(pady=(0, 16))
+
+        self._status_text_id = self._canvas.create_text(
+            180,
+            26,
             text=self.status.value.upper(),
-            font=("Helvetica", 14, "bold"),
-            fg="#555555",
+            font=("Helvetica", 12, "bold"),
+            fill="#8b949e",
         )
-        self._status_label.pack(pady=(0, 10))
 
-        # Dedicated high-contrast digital display screen box
-        display_frame = tk.Frame(
-            main_frame,
-            bg="#111116",
-            bd=3,
-            relief=tk.RIDGE,
-            padx=16,
-            pady=12,
-        )
-        display_frame.pack(fill=tk.X, pady=(0, 20))
-
-        self._display_var = tk.StringVar(self._root, value=self._display_text)
-        self._display_label = tk.Label(
-            display_frame,
-            textvariable=self._display_var,
+        self._display_text_id = self._canvas.create_text(
+            180,
+            72,
             text=self._display_text,
-            font=("Menlo", 42, "bold"),
-            bg="#111116",
-            fg="#00FF66",
+            font=("Menlo", 46, "bold"),
+            fill="#00FF66",
         )
-        self._display_label.pack(expand=True)
 
         buttons_frame = tk.Frame(main_frame)
         buttons_frame.pack()
@@ -151,7 +143,7 @@ class StopwatchApp:
             width=8,
             command=self._on_start_clicked,
         )
-        self._start_button.grid(row=0, column=0, padx=5)
+        self._start_button.grid(row=0, column=0, padx=6)
 
         self._pause_button = tk.Button(
             buttons_frame,
@@ -159,7 +151,7 @@ class StopwatchApp:
             width=8,
             command=self._on_pause_clicked,
         )
-        self._pause_button.grid(row=0, column=1, padx=5)
+        self._pause_button.grid(row=0, column=1, padx=6)
 
         self._resume_button = tk.Button(
             buttons_frame,
@@ -167,7 +159,7 @@ class StopwatchApp:
             width=8,
             command=self._on_resume_clicked,
         )
-        self._resume_button.grid(row=0, column=2, padx=5)
+        self._resume_button.grid(row=0, column=2, padx=6)
 
         self._reset_button = tk.Button(
             buttons_frame,
@@ -175,7 +167,7 @@ class StopwatchApp:
             width=8,
             command=self._on_reset_clicked,
         )
-        self._reset_button.grid(row=0, column=3, padx=5)
+        self._reset_button.grid(row=0, column=3, padx=6)
 
         self._update_button_states()
 
