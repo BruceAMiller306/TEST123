@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import time
 from typing import Callable
 from src.time_formatter import format_stopwatch_time
